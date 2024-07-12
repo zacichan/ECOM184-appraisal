@@ -41,6 +41,108 @@ geometry:
 
 # Research Methodology
 
+### Current Methodology of Monte Carlo in Cost-Benefit Analysis as Outlined in the UK Green Book
+
+The Green Book is the UK Government's comprehensive guide for conducting appraisals of public sector projects and policies. It aims to ensure that the economic, financial, social, and environmental impacts of proposed initiatives are rigorously assessed.
+
+### Key Steps in Appraisal as Outlined in the Green Book
+
+| **Step**                          | **Description**                                                                                             |
+|------------------|------------------------------------------------------|
+| **Define the Problem**            | \- Clearly articulate the problem that the policy or project intends to address.                            |
+|                                   | \- Understand the underlying causes and set objectives.                                                     |
+| **Establish Objectives**          | \- Define specific, measurable, and achievable objectives for each option.                                  |
+|                                   | \- Objectives should encompass economic, social, and environmental aspects.                                 |
+| **Identify Options**              | \- Develop a range of possible options to address the problem.                                              |
+|                                   | \- Include a "do-nothing" option as a baseline for comparison.                                              |
+| **Appraise Options**              | \- Conduct a rigorous assessment of each option, including a detailed cost-benefit analysis.                |
+|                                   | \- Consider the present value of costs and benefits over a specified time frame.                             |
+|                                   | \- Use appropriate discount rates to account for the time value of money.                                   |
+| **Sensitivity Analysis**          | \- Test the robustness of the appraisal by varying key assumptions and parameters.                          |
+|                                   | \- Assess how changes in inputs impact the results.                                                         |
+| **Decision Making**               | \- Compare the outcomes of the different options, considering financial, social, and environmental impacts. |
+|                                   | \- Make informed decisions based on the appraisal results.                                                  |
+| **Implementation and Monitoring** | \- Once a decision is made, implement the chosen option.                                                    |
+|                                   | \- Establish a monitoring framework to track actual performance against expected outcomes.                  |
+
+### Sensitivity Analysis and Optimism Bias
+
+Sensitivity analysis explores how the expected outcomes of an intervention are sensitive to variations in key input variables. It helps understand the impact of changing assumptions on project feasibility and preferred options. A key concept within sensitivity analysis is the "Switching Value"—the value at which a key input variable would need to change to switch from a recommended option to another or for a proposal not to receive funding. Identifying switching values is crucial for decision-making.
+
+Optimism bias is the demonstrated systematic tendency for appraisers to be over-optimistic about key project parameters, including capital costs, operating costs, project duration, and benefits delivery. Adjusting for optimism bias is essential to provide a realistic assessment of project estimates. These adjustments should align with risk avoidance and mitigation measures, supported by robust evidence.
+
+### Monte Carlo Analysis
+
+Monte Carlo analysis is a simulation-based risk modelling technique that produces expected values and confidence intervals. It is particularly useful when dealing with multiple variables with significant uncertainties that have known or reasonably estimated independent probability distributions. Monte Carlo simulations generate a range of possible outcomes, providing a comprehensive view of potential risks and benefits.
+
+### Research Methodology
+
+### Overview
+
+This section details the methodology employed for conducting Monte Carlo simulations to perform cost-benefit analysis (CBA). The methodology hinges on the adoption of the Log-Normal distribution for modeling costs and benefits, justified by the inherent nature of these quantities being positive and potentially unbounded.
+
+### Log-Normal Distribution
+
+#### Rationale
+
+In cost-benefit analysis, it is essential to acknowledge that costs and benefits are not typically normally distributed. They can only be positive and, in some cases, may have an upper limit that extends towards infinity. For example, the ultimate benefit of achieving Net Zero could equate to the survival of the human race, while the cost of a hostile alien invasion could be astronomical. Such considerations make the Log-Normal distribution an appropriate model as it accommodates a right-skewed distribution with a long upper tail.
+
+#### Application in Cost Estimation
+
+The Log-Normal distribution can be leveraged in project cost estimation by using its Cumulative Density Function (CDF) to derive the parameters $\mu$ (mu) and $\sigma$ (sigma) such that 95% of cost estimates lie between specified low and high estimates. This approach assumes the central cost estimate represents the mode of the distribution.
+
+##### Calculation of Parameters
+
+The mode of the Log-Normal distribution is given by:
+
+$$ \text{mode} = e^{\mu - \sigma^2} = \text{central} $$
+
+Solving for $\mu$ yields:
+
+$$ \mu = \log(\text{mode}) + \sigma^2 = \log(\text{central}) + \sigma^2 $$
+
+To find the appropriate $\sigma$, we need to ensure that approximately 95% of our project cost estimates fall between the low and high cost estimates. This can be achieved by minimizing the difference between the Log-Normal CDF evaluated at the high cost estimate and the low cost estimate.
+
+##### Practical Implementation
+
+The following steps outline the practical implementation of this methodology using a sample project dataset:
+
+1.  **Define the Optimization Function**: This function calculates the difference between the CDF values at the high and low cost estimates, aiming for a difference of 0.95.
+
+    ``` r
+    f <- function(sigma){
+      mu <- log(data$central[1]) + sigma^2
+      abs(plnorm(data$high[1], mu, sigma) - plnorm(data$low[1], mu, sigma) - 0.95)
+    }
+    ```
+
+2.  **Optimize the Sigma Value**: Use the `optimize` function to find the value of $\sigma$ that minimises the difference.
+
+    ``` r
+    sigma_test <- optimize(f, lower = 0, upper = 1)$minimum
+    ```
+
+3.  **Calculate Mu**: Plug the optimised $\sigma$ back into the formula for $\mu$.
+
+    ``` r
+    mu_test <- log(data$central[1]) + sigma_test^2
+    ```
+
+4.  **Simulate the Distribution**: Generate a large sample of cost estimates using the derived parameters.
+
+    ``` r
+    N <- 10000000
+    nums <- rlnorm(N, mu_test, sigma_test)
+    ```
+
+5.  **Validate the Simulation**: Check the proportion of simulated values falling between the low and high estimates to ensure it approximates 95%.
+
+    ``` r
+    proportion <- sum(data$low[1] < nums & nums < data$high[1]) / N
+    ```
+
+By following these steps, we ensure that our cost estimates are robust and align with the statistical properties of the Log-Normal distribution, providing a realistic and reliable basis for cost-benefit analysis in projects.
+
 # Results
 
 # Discussion and Conclusion
@@ -48,21 +150,3 @@ geometry:
 # References
 
 # Appendices
-
-::: {.callout-note title="Definition"}
--   Sensitivity analysis explores how the expected outcomes of an intervention are sensitive to variations in key input variables.
--   It helps understand the impact of changing assumptions on project feasibility and preferred options.
-:::
-
-A key concept is the Switching Value - the value at which a key input variable would need to change to switch from a recommended option to another or for a proposal not to receive funding. Identifying switching values is crucial to decision-making.
-
-::: {.callout-note title="Definition"}
-
-Optimism bias is the demonstrated systematic tendency for appraisers to be over-optimistic about key project parameters, including capital costs, operating costs, project duration and benefits delivery.
-:::
-
--   Adjust for optimism bias to provide a realistic assessment of project estimates.
-
--   Adjustments should align with risk avoidance and mitigation measures, with robust evidence required before reductions.
-
--   Apply optimism bias adjustments to operating and capital costs. Use confidence intervals for key input variables when typical bias measurements are unavailable.
