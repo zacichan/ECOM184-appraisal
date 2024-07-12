@@ -1,0 +1,68 @@
+---
+title: |
+  ECOM184: Economic Appraisal Group Project
+subtitle: Monte Carlo Simulations for CBA
+published: "Queen Mary Economic Masters Apprenticeship Program"
+code-repo: "Access the code, data, and analysis at <https://github.com/zacichan/ECOM184-appraisal>"
+correspondence-prefix: "Correspondence concerning this article should be addressed to"
+author:
+  - name: Zac Payne-Thompson
+    email: zachary.paynethompson2@dsit.gov.uk
+    title: Lead Data Scientist
+    attributes:
+      corresponding: true
+abstract: |
+  This research evaluates the impact of Monte Carlo simulations on Cost-Benefit Analysis (CBA) outcomes in business cases. Traditional CBA methods often fail to account for the inherent uncertainties in real-world scenarios, potentially leading to suboptimal decision-making. By integrating Monte Carlo simulations, which model uncertainty and variability, this study aims to determine whether applying such simulations to existing CBAs would alter past business decisions. The research draws on a comprehensive literature review and addresses the lack of empirical studies applying Monte Carlo methods to historical business cases, the insufficient understanding of their influence on decision-making, and the need for a standardized methodology to incorporate these simulations into CBA practices. Using previously published business cases from various industries and time periods, the study conducts a comparative analysis between traditional and Monte Carlo-enhanced CBAs. The findings will offer insights into the benefits of probabilistic approaches in project appraisals, potentially establishing a more robust framework for evaluating project outcomes.
+thanks: |
+  Here is where you can say thanks
+additional-info: |
+  We have no known conflict of interest to disclose.
+keywords:
+  - CBA
+  - Economic Appraisal
+  - Monte Carlo
+date: 08/02/2024
+epigraph:
+  - text: Anyone who attempts to generate random numbers by deterministic means is, of course, living in a state of sin. 
+    source: Jon von Neumann
+# bibliography: references.bib
+format:
+  hikmah-pdf: default
+  hikmah-manuscript-pdf: default
+geometry:
+  - top=30mm
+  - left=20mm
+  - heightrounded
+---
+
+# Intro
+
+# Literature Review
+
+# Research Methodology
+
+# Results
+
+# Discussion and Conclusion
+
+# References
+
+# Appendices
+
+::: {.callout-note title="Definition"}
+-   Sensitivity analysis explores how the expected outcomes of an intervention are sensitive to variations in key input variables.
+-   It helps understand the impact of changing assumptions on project feasibility and preferred options.
+:::
+
+A key concept is the Switching Value - the value at which a key input variable would need to change to switch from a recommended option to another or for a proposal not to receive funding. Identifying switching values is crucial to decision-making.
+
+::: {.callout-note title="Definition"}
+
+Optimism bias is the demonstrated systematic tendency for appraisers to be over-optimistic about key project parameters, including capital costs, operating costs, project duration and benefits delivery.
+:::
+
+-   Adjust for optimism bias to provide a realistic assessment of project estimates.
+
+-   Adjustments should align with risk avoidance and mitigation measures, with robust evidence required before reductions.
+
+-   Apply optimism bias adjustments to operating and capital costs. Use confidence intervals for key input variables when typical bias measurements are unavailable.
