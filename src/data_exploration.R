@@ -3,7 +3,6 @@ library(tidyverse)
 library(ggplot2)
 library(ggtext)
 library(scales)
-library(cowplot)
 
 # Constants
 NUM_SIMS <- 10000
@@ -74,7 +73,7 @@ plot_distribution <- function(results, title, subtitle) {
              vjust = -1, color = "black") +
     annotate("text", x = upper_bound, y = max(y_vals), 
              label = paste("95% CI: [", round(lower_bound, 2), ",", round(upper_bound, 2), "]"), 
-             hjust = 0, vjust = 1, color = "black") +
+             hjust = -0.1, vjust = 1, color = "black") +
     labs(title = title, subtitle = subtitle, x = "Value", y = "Density") +
     theme_minimal()
 }
@@ -111,18 +110,6 @@ simulate_and_plot_option <- function(option_name, options_data) {
   list(cost_fig = cost_fig, benefit_fig = benefit_fig, bcr_fig = bcr_fig)
 }
 
-# Function to create grid of plots
-create_grid_of_plots <- function(options_data) {
-  plots <- list()
-  
-  for (option_name in names(options_data)) {
-    result_plots <- simulate_and_plot_option(option_name, options_data)
-    plots <- c(plots, result_plots$cost_fig, result_plots$benefit_fig, result_plots$bcr_fig)
-  }
-  
-  plot_grid(plotlist = plots, ncol = 3, align = 'hv')
-}
-
 # Example Usage
 options_data <- list(
   option_1 = list(
@@ -139,4 +126,17 @@ options_data <- list(
   )
 )
 
-create_grid_of_plots(options_data)
+# Option 1
+
+result_plots <- simulate_and_plot_option("option_1", options_data)
+
+# Display plots
+result_plots$cost_fig
+result_plots$benefit_fig
+
+ORIGINAL_BCR_1 <- 1.2
+
+result_plots$bcr_fig + 
+  geom_vline(xintercept = ORIGINAL_BCR_1, linetype = "dashed", color = "green") +
+  annotate("text", x = ORIGINAL_BCR_1, y = 1, label = paste("Original Estimate:", round(ORIGINAL_BCR_1, 2)), 
+           vjust = -1, color = "black")
