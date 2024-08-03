@@ -48,7 +48,7 @@ The Green Book is the UK Government's comprehensive guide for conducting apprais
 ### Key Steps in Appraisal as Outlined in the Green Book
 
 | **Step**                          | **Description**                                                                                             |
-|------------------|------------------------------------------------------|
+|-----------------------------------|-------------------------------------------------------------------------------------------------------------|
 | **Define the Problem**            | \- Clearly articulate the problem that the policy or project intends to address.                            |
 |                                   | \- Understand the underlying causes and set objectives.                                                     |
 | **Establish Objectives**          | \- Define specific, measurable, and achievable objectives for each option.                                  |
@@ -56,7 +56,7 @@ The Green Book is the UK Government's comprehensive guide for conducting apprais
 | **Identify Options**              | \- Develop a range of possible options to address the problem.                                              |
 |                                   | \- Include a "do-nothing" option as a baseline for comparison.                                              |
 | **Appraise Options**              | \- Conduct a rigorous assessment of each option, including a detailed cost-benefit analysis.                |
-|                                   | \- Consider the present value of costs and benefits over a specified time frame.                             |
+|                                   | \- Consider the present value of costs and benefits over a specified time frame.                            |
 |                                   | \- Use appropriate discount rates to account for the time value of money.                                   |
 | **Sensitivity Analysis**          | \- Test the robustness of the appraisal by varying key assumptions and parameters.                          |
 |                                   | \- Assess how changes in inputs impact the results.                                                         |

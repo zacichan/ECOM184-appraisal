@@ -54,60 +54,88 @@ simulate_distribution <- function(low, central, high, dist_type, num_sims = NUM_
   results
 }
 
-# Function to plot distributions
-plot_distribution <- function(results, title, subtitle) {
-  density_data <- density(results)
-  x_vals <- density_data$x
-  y_vals <- density_data$y
+# Function to calculate BCR results
+calculate_bcr_results <- function(options_data) {
+  bcr_results_list <- list()
   
-  lower_bound <- quantile(results, (1 - CONFIDENCE_LEVEL) / 2)
-  upper_bound <- quantile(results, 1 - (1 - CONFIDENCE_LEVEL) / 2)
-  modal_point <- x_vals[which.max(y_vals)]
+  for (option_name in names(options_data)) {
+    data <- options_data[[option_name]]
+    
+    low_cost <- data$cost$low
+    central_cost <- data$cost$central
+    high_cost <- data$cost$high
+    cost_dist_type <- "Log-Normal"
+    
+    low_benefit <- data$benefit$low
+    central_benefit <- data$benefit$central
+    high_benefit <- data$benefit$high
+    benefit_dist_type <- "Log-Normal"
+    
+    cost_results <- simulate_distribution(low_cost, central_cost, high_cost, cost_dist_type)
+    benefit_results <- simulate_distribution(low_benefit, central_benefit, high_benefit, benefit_dist_type)
+    
+    bcr_results <- benefit_results / cost_results
+    bcr_results_list[[option_name]] <- bcr_results
+  }
   
-  ggplot() +
-    geom_line(aes(x = x_vals, y = y_vals), color = "blue") +
-    geom_ribbon(aes(x = ifelse(x_vals >= lower_bound & x_vals <= upper_bound, x_vals, NA), 
-                    ymin = 0, ymax = y_vals), fill = "lightcoral", alpha = 0.5) +
-    geom_vline(xintercept = c(lower_bound, upper_bound), linetype = "dashed", color = "red") +
-    annotate("text", x = modal_point, y = max(y_vals), label = paste("Modal Point:", round(modal_point, 2)), 
-             vjust = -1, color = "black") +
-    annotate("text", x = upper_bound, y = max(y_vals), 
-             label = paste("95% CI: [", round(lower_bound, 2), ",", round(upper_bound, 2), "]"), 
-             hjust = -0.1, vjust = 1, color = "black") +
-    labs(title = title, subtitle = subtitle, x = "Value", y = "Density") +
-    theme_minimal()
+  bcr_results_list
 }
 
-# Function to simulate and plot for an option
-simulate_and_plot_option <- function(option_name, options_data) {
-  data <- options_data[[option_name]]
+# Function to create a combined BCR data frame for faceting
+create_bcr_df <- function(bcr_results_list) {
+  bcr_df <- data.frame()
   
-  low_cost <- data$cost$low
-  central_cost <- data$cost$central
-  high_cost <- data$cost$high
-  cost_dist_type <- "Log-Normal"
+  for (option_name in names(bcr_results_list)) {
+    results <- bcr_results_list[[option_name]]
+    df <- data.frame(Value = results, Option = option_name)
+    bcr_df <- rbind(bcr_df, df)
+  }
   
-  low_benefit <- data$benefit$low
-  central_benefit <- data$benefit$central
-  high_benefit <- data$benefit$high
-  benefit_dist_type <- "Log-Normal"
+  bcr_df
+}
+
+# Function to plot faceted BCR distribution
+plot_faceted_bcr_distribution <- function(bcr_df, original_estimates) {
+  # Create a mapping for the option descriptions
+  option_labels <- c(
+    "option_1" = "Phase 1 Only",
+    "option_2" = "Phases 1 and 2a",
+    "option_3" = "Full Network"
+  )
   
-  cost_results <- simulate_distribution(low_cost, central_cost, high_cost, cost_dist_type)
-  benefit_results <- simulate_distribution(low_benefit, central_benefit, high_benefit, benefit_dist_type)
+  # Calculate 95% CI and modal points for each option
+  stats_df <- bcr_df %>%
+    group_by(Option) %>%
+    summarise(
+      Lower_CI = quantile(Value, probs = 0.025),
+      Upper_CI = quantile(Value, probs = 0.975),
+      Modal_Point = Value[which.max(density(Value)$y)]
+    )
   
-  cost_title <- "Cost Distribution"
-  benefit_title <- "Benefit Distribution"
-  bcr_title <- "Benefit-Cost Ratio Distribution"
-  
-  subtitle <- paste("Option:", option_name)
-  
-  cost_fig <- plot_distribution(cost_results, cost_title, subtitle)
-  benefit_fig <- plot_distribution(benefit_results, benefit_title, subtitle)
-  
-  bcr_results <- benefit_results / cost_results
-  bcr_fig <- plot_distribution(bcr_results, bcr_title, subtitle)
-  
-  list(cost_fig = cost_fig, benefit_fig = benefit_fig, bcr_fig = bcr_fig)
+  ggplot(bcr_df, aes(x = Value)) +
+    geom_density(aes(y = after_stat(density)), color = "blue") +
+    geom_ribbon(stat = "density", aes(ymin = 0, ymax = after_stat(density)), fill = "lightcoral", alpha = 0.5) +
+    facet_wrap(~Option, ncol = 1, labeller = labeller(Option = option_labels)) +
+    geom_vline(data = original_estimates, aes(xintercept = Original, color = Option), linetype = "dashed", show.legend = FALSE) +
+    geom_vline(data = stats_df, aes(xintercept = Lower_CI), linetype = "dashed", color = "red") +
+    geom_vline(data = stats_df, aes(xintercept = Upper_CI), linetype = "dashed", color = "red") +
+    geom_text(data = original_estimates, aes(x = Original, label = paste("Original Estimate:", round(Original, 2)), y = 1.2), 
+              color = "black", vjust = -1, size = 3) +
+    geom_text(data = stats_df, aes(x = Modal_Point, y = 3, label = paste("Modal Point:", round(Modal_Point, 2))), 
+              color = "black", vjust = -1, size = 3) +
+    geom_text(data = stats_df, aes(x = Upper_CI, y = 3, label = paste("95% CI: [", round(Lower_CI, 2), ",", round(Upper_CI, 2), "]")), 
+              color = "black", hjust = -0.1, vjust = 1, size = 3) +
+    labs(
+      title = "Probabilistic Assessment of HS2 Project Phases:",
+      subtitle = "Monte Carlo Simulation Analysis",
+      x = "Benefit-Cost Ratio (BCR)", 
+      y = "Probability Density"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.y = element_blank(),
+      strip.text = element_text(face = "bold", size = 10)
+    )
 }
 
 # Example Usage
@@ -126,17 +154,15 @@ options_data <- list(
   )
 )
 
-# Option 1
+# Calculate BCR results
+bcr_results_list <- calculate_bcr_results(options_data)
 
-result_plots <- simulate_and_plot_option("option_1", options_data)
+# Create a data frame for BCR values and options
+bcr_df <- create_bcr_df(bcr_results_list)
 
-# Display plots
-result_plots$cost_fig
-result_plots$benefit_fig
+# Define original estimates for BCR values
+original_estimates <- data.frame(Option = c("option_1", "option_2", "option_3"),
+                                 Original = c(1.2, 1.2, 1.5))
 
-ORIGINAL_BCR_1 <- 1.2
-
-result_plots$bcr_fig + 
-  geom_vline(xintercept = ORIGINAL_BCR_1, linetype = "dashed", color = "green") +
-  annotate("text", x = ORIGINAL_BCR_1, y = 1, label = paste("Original Estimate:", round(ORIGINAL_BCR_1, 2)), 
-           vjust = -1, color = "black")
+# Plot the faceted BCR distribution
+plot_faceted_bcr_distribution(bcr_df, original_estimates)
